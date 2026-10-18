@@ -40,7 +40,6 @@ that was always allowed to bypass it.
 | Path | What it covers |
 |---|---|
 | `docs/CHOOSING-A-MODEL.md` | ACL, RBAC, ABAC, ReBAC and policy-as-code — what each answers, what it costs, and the signal to move |
-| `case-studies/` | Worked examples from systems in production |
 
 ## Status
 
@@ -54,6 +53,8 @@ yet written:
 - Authorisation and audit — what has to be recorded for a decision to be
   reconstructible after the fact.
 - Migration paths — moving between models without a rewrite.
+- Case studies — worked examples from systems in production, checked against
+  what actually shipped rather than against hypotheticals.
 
 ## Scope
 
