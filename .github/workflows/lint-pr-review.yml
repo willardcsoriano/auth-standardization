@@ -1,0 +1,69 @@
+name: Lint PR Review
+
+# Free, deterministic PR review: runs shellcheck on changed shell scripts
+# (including the extensionless .githooks/*) and ruff on changed Python, then
+# posts the result as a COMMENT review from github-actions[bot].  Not APPROVE:
+# GitHub refuses APPROVE reviews from the default Actions token by design.
+# A record, not a merge gate: no branch protection or required check.
+# Note: bot reviews don't count toward the PR author's profile stats; the
+# author's own `gh pr review --comment` does.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  RUFF_VERSION: "0.16.10"
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Lint changed files
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: |
+          set -o pipefail
+          git fetch origin "$BASE_REF" --depth=1
+          changed() { git diff --name-only --diff-filter=d "origin/$BASE_REF...HEAD" -- "$@" || true; }
+          SH=$(changed '*.sh' '*.bash' '.githooks/*')
+          PY=$(changed '*.py')
+          {
+            if [ -z "$SH$PY" ]; then
+              echo "No shell or Python files changed in this PR."
+            fi
+            if [ -n "$SH" ]; then
+              # Test the linter's own output: the markdown header always has text.
+              OUT=$(echo "$SH" | xargs shellcheck 2>&1 || true)
+              if [ -z "$OUT" ]; then
+                echo "shellcheck found no issues in:"; echo "$SH" | sed 's/^/- `/; s/$/`/'
+              else
+                echo "## shellcheck"; echo; echo '```'; echo "$OUT"; echo '```'
+              fi
+              echo
+            fi
+            if [ -n "$PY" ]; then
+              OUT=$(echo "$PY" | xargs pipx run "ruff==$RUFF_VERSION" check --output-format concise --no-cache 2>&1) && OUT=""
+              if [ -z "$OUT" ]; then
+                echo "ruff $RUFF_VERSION found no issues in:"; echo "$PY" | sed 's/^/- `/; s/$/`/'
+              else
+                echo "## ruff $RUFF_VERSION"; echo; echo '```'; echo "$OUT"; echo '```'
+              fi
+            fi
+          } > review.md
+
+      - name: Post as a GitHub review
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr review "${{ github.event.pull_request.number }}" \
+            --comment \
+            --body-file review.md
