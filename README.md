@@ -1,4 +1,4 @@
-# auth-baselines
+# auth-standardization
 
 ## Overview
 
@@ -37,24 +37,34 @@ that was always allowed to bypass it.
 
 ## Contents
 
-| Path | What it covers |
+Start with `ARCHITECTURE.md`, which explains the split below and why it exists.
+
+| Tree | Status | Holds |
+|---|---|---|
+| `spec/` | Normative | What a conforming system must do. The only tree using MUST/SHOULD/MAY |
+| `models/` | Informative | The five designs, what each answers, and the decision procedure |
+| `enforcement/` | Informative | Where a rule can be evaluated, and what each placement costs |
+| `identity/` | Informative | Establishing a principal, and the contract handed to authorisation |
+| `practices/` | Informative | Testing, auditing, migration, anti-patterns |
+| `reference/` | Executable | Minimal working systems that prove a claim holds |
+| `case-studies/` | Evidence | Real systems described as they are, including what they got wrong |
+| `decisions/` | Record | Why this repository is shaped this way, and where it was narrowed |
+
+Every tree carries a `README.md` stating its scope boundary and enumerating the
+documents planned inside it.
+
+Complete so far:
+
+| Document | |
 |---|---|
-| `docs/CHOOSING-A-MODEL.md` | ACL, RBAC, ABAC, ReBAC and policy-as-code — what each answers, what it costs, and the signal to move |
+| `ARCHITECTURE.md` | The normative/informative split, the layering, the conventions |
+| `GLOSSARY.md` | One meaning per term; where common usage conflicts, the conflict is named |
+| `models/CHOOSING-A-MODEL.md` | The decision procedure across all five models, and the invariant boundary |
+| `decisions/0001-record-architecture-decisions.md` | That decisions are recorded here |
 
-## Status
-
-Early. `docs/CHOOSING-A-MODEL.md` is the first complete document. Planned, not
-yet written:
-
-- Enforcement layers — application, gateway, and database row-level security,
-  with the trade-offs between them.
-- Multi-tenancy — tenant isolation as an authorisation problem and the failure
-  modes of getting it wrong.
-- Authorisation and audit — what has to be recorded for a decision to be
-  reconstructible after the fact.
-- Migration paths — moving between models without a rewrite.
-- Case studies — worked examples from systems in production, checked against
-  what actually shipped rather than against hypotheticals.
+Everything else is a stated intent with its documents enumerated, not yet
+written. The distinction between "deliberately out of scope" and "not yet
+written" is kept explicit on purpose.
 
 ## Scope
 
